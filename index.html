@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Накладная СДЭК — Финальная версия</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 5mm;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 5px;
+            font-size: 8.5px;
+            color: #000;
+            line-height: 1.1;
+        }
+        .container {
+            width: 100%;
+            box-sizing: border-box;
+            position: relative;
+            padding-left: 45px; /* Space for vertical barcode */
+        }
+        
+        /* Vertical Barcode on the left */
+        .vertical-barcode {
+            position: absolute;
+            left: 5px;
+            top: 20px;
+            bottom: 20px;
+            width: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5px;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .v-bar {
+            width: 100%;
+            height: 2px;
+            background-color: #000;
+        }
+        .v-bar.thin { height: 1px; }
+        .v-bar.thick { height: 3px; }
+        .v-bar.gap { background-color: transparent; height: 2px; }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 5px;
+            padding-left: 0;
+        }
+        .logo-section {
+            width: 150px;
+        }
+        .barcode-section {
+            flex-grow: 1;
+            text-align: center;
+        }
+        .barcode-section img {
+            height: 45px;
+            width: 100%;
+            max-width: 450px;
+        }
+        .location-section {
+            width: 180px;
+            text-align: right;
+            font-size: 11px;
+            font-weight: bold;
+            line-height: 1.2;
+        }
+
+        .tracking-notice {
+            font-size: 8px;
+            margin-bottom: 5px;
+            border-bottom: 1px solid #000;
+            padding-bottom: 2px;
+            width: 100%;
+        }
+
+        /* Main Info Grid */
+        .main-grid {
+            width: 100%;
+            border-collapse: collapse;
+            border: 1.5px solid #000;
+        }
+        .main-grid td {
+            border: 1px solid #000;
+            vertical-align: top;
+            padding: 2px 4px;
+        }
+        .cell-title {
+            background-color: #e8e8e8;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 8.5px;
+            display: block;
+            margin: -2px -4px 3px -4px;
+            padding: 2px 4px;
+            border-bottom: 1px solid #000;
+        }
+        .info-label {
+            font-weight: bold;
+        }
+
+        /* Status Boxes */
+        .status-container {
+            display: flex;
+            flex-direction: row;
+            gap: 8px;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+        }
+        .status-box {
+            border: 1.5px solid #000;
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: bold;
+            position: relative;
+        }
+        .crossed-house {
+            width: 35px;
+            height: 35px;
+            position: relative;
+            opacity: 0.8;
+        }
+        .cross-line {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: #000;
+            transform: rotate(45deg);
+        }
+        .cross-line.rev { transform: rotate(-45deg); }
+
+        /* Items Table */
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 5px;
+        }
+        .items-table th, .items-table td {
+            border: 1px solid #000;
+            padding: 2px;
+            text-align: center;
+            font-size: 7.5px;
+        }
+        .items-table th {
+            background-color: #e8e8e8;
+            font-weight: bold;
+        }
+
+        /* Bottom Grid */
+        .bottom-grid {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 5px;
+        }
+        .bottom-grid td {
+            border: 1px solid #000;
+            vertical-align: top;
+            padding: 4px;
+        }
+        .terms-text {
+            font-size: 6px;
+            text-align: justify;
+            line-height: 1.1;
+        }
+        .financial-summary {
+            text-align: right;
+            font-size: 9px;
+        }
+        .summary-row {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 2px;
+        }
+        .summary-label { flex: 1; text-align: right; padding-right: 5px; }
+        .summary-value { font-weight: bold; min-width: 60px; }
+
+        /* Signature Blocks */
+        .signature-section {
+            margin-top: 8px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 7px;
+        }
+        .sig-block {
+            width: 49%;
+        }
+        .sig-header {
+            font-weight: bold;
+            font-size: 8px;
+            margin-bottom: 4px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .sig-line {
+            border-bottom: 1px solid #000;
+            margin-bottom: 4px;
+            padding-bottom: 1px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .sig-caption {
+            font-size: 6px;
+            text-align: center;
+            margin-top: -3px;
+            display: block;
+        }
+        
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 2px;
+        }
+        .checkbox-box {
+            width: 10px;
+            height: 10px;
+            border: 1px solid #000;
+            margin-right: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Vertical Barcode Visual -->
+        <div class="vertical-barcode">
+            <div class="v-bar thick"></div><div class="v-bar gap"></div>
+            <div class="v-bar thin"></div><div class="v-bar thin"></div><div class="v-bar gap"></div>
+            <div class="v-bar thick"></div><div class="v-bar thin"></div><div class="v-bar gap"></div>
+            <div class="v-bar thin"></div><div class="v-bar thick"></div><div class="v-bar gap"></div>
+            <div class="v-bar thick"></div><div class="v-bar thick"></div><div class="v-bar gap"></div>
+            <div class="v-bar thin"></div><div class="v-bar thin"></div><div class="v-bar gap"></div>
+            <div class="v-bar thick"></div><div class="v-bar thick"></div><div class="v-bar gap"></div>
+            <div class="v-bar thin"></div><div class="v-bar thin"></div><div class="v-bar gap"></div>
+            <div class="v-bar thick"></div><div class="v-bar thin"></div><div class="v-bar gap"></div>
+            <div class="v-bar thick"></div><div class="v-bar thick"></div><div class="v-bar gap"></div>
+            <div class="v-bar thin"></div><div class="v-bar thick"></div><div class="v-bar gap"></div>
+            <div class="v-bar thick"></div><div class="v-bar thin"></div><div class="v-bar gap"></div>
+            <div class="v-bar thick"></div><div class="v-bar thick"></div><div class="v-bar gap"></div>
+            <div class="v-bar thin"></div><div class="v-bar thin"></div><div class="v-bar gap"></div>
+            <div class="v-bar thick"></div><div class="v-bar thin"></div><div class="v-bar gap"></div>
+            <div class="v-bar thick"></div><div class="v-bar thick"></div><div class="v-bar gap"></div>
+            <div class="v-bar thick"></div><div class="v-bar gap"></div>
+            <div class="v-bar thin"></div><div class="v-bar thin"></div><div class="v-bar gap"></div>
+            <div class="v-bar thick"></div><div class="v-bar thin"></div><div class="v-bar gap"></div>
+            <div class="v-bar thin"></div><div class="v-bar thick"></div><div class="v-bar gap"></div>
+            <div class="v-bar thick"></div><div class="v-bar thick"></div><div class="v-bar gap"></div>
+            <div class="v-bar thin"></div><div class="v-bar thin"></div><div class="v-bar gap"></div>
+            <div class="v-bar thick"></div><div class="v-bar thick"></div><div class="v-bar gap"></div>
+            <div class="v-bar thick"></div><div class="v-bar gap"></div>
+            <div class="v-bar thin"></div><div class="v-bar thin"></div><div class="v-bar gap"></div>
+            <div class="v-bar thick"></div><div class="v-bar thin"></div><div class="v-bar gap"></div>
+            <div class="v-bar thin"></div><div class="v-bar thick"></div><div class="v-bar gap"></div>
+            <div class="v-bar thick"></div><div class="v-bar thick"></div><div class="v-bar gap"></div>
+            <div class="v-bar thick"></div><div class="v-bar gap"></div>
+            <div class="v-bar thin"></div><div class="v-bar thin"></div><div class="v-bar gap"></div>
+            <div class="v-bar thick"></div><div class="v-bar thin"></div><div class="v-bar gap"></div>
+            <div class="v-bar thin"></div><div class="v-bar thick"></div><div class="v-bar gap"></div>
+            <div class="v-bar thick"></div><div class="v-bar thick"></div><div class="v-bar gap"></div>
+            <div class="v-bar thick"></div><div class="v-bar gap"></div>
+            <div class="v-bar thin"></div><div class="v-bar thin"></div><div class="v-bar gap"></div>
+            <div class="v-bar thick"></div><div class="v-bar thin"></div><div class="v-bar gap"></div>
+            <div class="v-bar thin"></div><div class="v-bar thick"></div><div class="v-bar gap"></div>
+            <div class="v-bar thick"></div><div class="v-bar thick"></div><div class="v-bar gap"></div>
+        </div>
+
+        <!-- Header -->
+        <div class="header">
+            <div class="logo-section">
+                <div style="display: flex; align-items: center;">
+                    <svg width="24" height="24" viewBox="0 0 100 100">
+                        <circle cx="50" cy="50" r="45" fill="#00A651"/>
+                        <path d="M25 50 L45 70 L75 30" fill="none" stroke="white" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span style="font-family: Arial; font-size: 26px; font-weight: bold; color: #00A651; margin-left: 5px; font-style: italic; letter-spacing: -1px;">CDEK</span>
+                </div>
+                <div style="color: #00A651; font-weight: bold; font-style: italic; font-size: 8px; margin-top: -2px;">логистические решения</div>
+            </div>
+            <div class="barcode-section">
+                <img src="data:image/png;base64,{{ barcode_b64 }}" alt="Barcode">
+                <div style="font-size: 11px; font-weight: bold; margin-top: 2px;">{{ waybill_num }}</div>
+            </div>
+            <div class="location-section">
+                Санкт-Петербург<br>
+                Россия
+            </div>
+        </div>
+
+        <div class="tracking-notice">
+            Для отслеживания заказа и вызова курьера используйте ТОЛЬКО официальный сайт <a href="http://www.cdek.ru" style="color:#000; font-weight: bold;">www.cdek.ru</a>
+        </div>
+
+        <!-- Main Info Block -->
+        <table class="main-grid">
+            <tr>
+                <td style="width: 48%;">
+                    <span class="cell-title">ОТПРАВИТЕЛЬ</span>
+                    <span class="info-label">Компания:</span> {{ sender_company }}
+                </td>
+                <td rowspan="2" style="width: 32%;">
+                    <span class="cell-title">ИНФОРМАЦИЯ ОБ ОТПРАВЛЕНИИ</span>
+                    <div style="padding: 2px 0;">
+                        <b>Накладная к Заказу № {{ order_id }}</b><br>
+                        <span class="info-label">Мест:</span> 1 шт.<br>
+                        <span class="info-label">Вес физический/объемный:</span> {{ item_weight }}<br>
+                        <span class="info-label">Вес к оплате:</span> {{ item_weight }}<br>
+                        <span class="info-label">№ упаковки:</span> 1<br>
+                        <span class="info-label">Услуга:</span> Склад-дверь
+                    </div>
+                </td>
+                <td rowspan="2" style="width: 20%; vertical-align: middle;">
+                    <div class="status-container">
+                        <div class="status-box">Д</div>
+                        <div class="status-box">
+                            <div class="crossed-house">
+                                <svg viewBox="0 0 24 24" width="35" height="35" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                                </svg>
+                                <div class="cross-line"></div>
+                                <div class="cross-line rev"></div>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <span class="cell-title">ПОЛУЧАТЕЛЬ</span>
+                    <span class="info-label">Компания:</span> {{ recipient_company }}<br>
+                    <span class="info-label">ФИО:</span> {{ recipient_name }}<br>
+                    <span class="info-label">Телефон:</span> {{ recipient_phone }}<br>
+                    <span class="info-label">Адрес:</span> {{ recipient_address }}
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3" style="border-top: 1.5px solid #000;">
+                    <span class="info-label">Особые отметки:</span> Частичная выдача не предусмотрена<br>
+                    <span class="info-label">Доп. услуги:</span> Объявленная стоимость, Запрет осмотра вложения
+                </td>
+            </tr>
+        </table>
+
+        <!-- Items Table -->
+        <table class="items-table">
+            <thead>
+                <tr>
+                    <th style="width: 30px;">№ n/n</th>
+                    <th style="width: 80px;">Код маркировки</th>
+                    <th>Наименование товара</th>
+                    <th style="width: 70px;">Объявленная стоимость за ед., руб</th>
+                    <th style="width: 60px;">К оплате за ед., руб</th>
+                    <th style="width: 30px;">Кол-во</th>
+                    <th style="width: 70px;">Итого к оплате с учетом НДС, руб</th>
+                    <th style="width: 40px;">НДС</th>
+                    <th style="width: 40px;">Кол-во вручен</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1</td>
+                    <td></td>
+                    <td style="text-align: left;">{{ item_desc }}</td>
+                    <td>{{ declared_price }}</td>
+                    <td>{{ declared_price }}</td>
+                    <td>1</td>
+                    <td>{{ declared_price }}</td>
+                    <td>БЕЗ НДС</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td colspan="5" style="text-align: right; font-weight: bold; border: none;">Итого</td>
+                    <td style="font-weight: bold;">1</td>
+                    <td colspan="3" style="border: none;"></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Bottom Grid -->
+        <table class="bottom-grid">
+            <tr>
+                <td style="width: 30%;">
+                    <div class="terms-text">
+                        Отправитель согласен с Общими условиями доставки, изложенными в Регламенте ВОКУ. Регламент размещен на сайте www.cdek.ru. Клиент гарантирует, что отправление не содержит предметов, запрещенных к пересылке. В случае предоставления неполной или некорректной контактной информации Исполнитель ответственность за своевременную доставку не несет. Ожидание курьера более 15 минут оплачивается отдельно. Отправление упаковано под ответственность Отправителя. Настоящим Получатель/Отправитель дает свое согласие на получение кассового чека в электронной форме, путем его предоставления на абонентский номер или электронную почту.
+                    </div>
+                </td>
+                <td style="width: 30%;">
+                    <span class="cell-title">ИНФОРМАЦИЯ ОБ ИМ</span>
+                    <span class="info-label">Компания:</span> {{ sender_company }}
+                </td>
+                <td style="width: 40%;">
+                    <div class="financial-summary">
+                        <div class="summary-row"><span class="summary-label">Стоимость доставки:</span> <span class="summary-value">0.00 руб.</span></div>
+                        <div class="summary-row"><span class="summary-label">Итого к оплате с получателя с учетом доставки:</span> <span class="summary-value">{{ declared_price }} руб.</span></div>
+                        <div class="summary-row"><span class="summary-label">Оплачено:</span> <span class="summary-value">0.00 руб.</span></div>
+                        <div class="summary-row"><span class="summary-label">Доплатить:</span> <span class="summary-value">{{ declared_price }} руб.</span></div>
+                    </div>
+                    <div style="margin-top: 5px; border-top: 1px solid #000; padding-top: 2px; font-weight: bold;">
+                        Итого получено: ____________________ руб.
+                    </div>
+                    <div style="margin-top: 5px;">
+                        <div class="checkbox-item"><div class="checkbox-box"></div> Доставлено полностью, упаковка не повреждена. Претензий не имею.</div>
+                        <div class="checkbox-item"><div class="checkbox-box"></div> Отказ по причине: _________________________________________</div>
+                    </div>
+                </td>
+            </tr>
+        </table>
+
+        <!-- Signatures -->
+        <div class="signature-section">
+            <div class="sig-block">
+                <div class="sig-header">
+                    <span>ОТПРАВЛЕНО: ОТПРАВИТЕЛЬ</span>
+                </div>
+                <div class="sig-line">
+                    <span>Дата: "{{ date }}"</span>
+                    <span>Время: ____ : ____</span>
+                </div>
+                <div class="sig-line" style="margin-top: 10px;">
+                    <span style="flex: 2;">Сотрудник принял: _________________________</span>
+                </div>
+                <div style="display: flex; justify-content: space-around; margin-left: 80px;">
+                    <span class="sig-caption">(ФИО)</span>
+                    <span class="sig-caption">(подпись)</span>
+                </div>
+            </div>
+            <div class="sig-block">
+                <div class="sig-header">
+                    <span>ПОДТВЕРЖДЕНИЕ ДОСТАВКИ: ПОЛУЧАТЕЛЬ</span>
+                </div>
+                <div class="sig-line">
+                    <span>Дата: "____" _________ 2026</span>
+                    <span>Время: ____ : ____</span>
+                </div>
+                <div class="sig-line">
+                    <span>ДОКУМЕНТ: серия _________ номер ________________</span>
+                </div>
+                <div class="sig-line" style="margin-top: 5px;">
+                    <span style="flex: 2;">Сотрудник доставил: _________________________</span>
+                </div>
+                <div style="display: flex; justify-content: space-around; margin-left: 80px;">
+                    <span class="sig-caption">(ФИО)</span>
+                    <span class="sig-caption">(подпись)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
