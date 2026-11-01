@@ -1,0 +1,4 @@
+aiogram
+requests
+playwright
+python-barcode
